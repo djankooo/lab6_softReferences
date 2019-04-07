@@ -12,9 +12,11 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.lang.ref.ReferenceQueue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.WeakHashMap;
 import java.util.stream.Stream;
 
 public class App extends Application {
@@ -52,6 +54,10 @@ public class App extends Application {
         Button next = new Button("Next ->");
         Button previous = new Button("<- Previous");
 
+        ReferenceQueue<Pane> referenceQueue = new ReferenceQueue<>();
+
+        WeakHashMap<Integer, Pane> map = new WeakHashMap<>();
+
         final int[] iterator = {1};
 
         next.prefWidthProperty().bind(primaryStage.widthProperty().multiply(0.2D));
@@ -63,17 +69,15 @@ public class App extends Application {
         urlTextField.setOnAction(event -> {
             if (!urlTextField.getText().isEmpty()) try {
 
+                Object[] objects = listAllFiles(urlTextField.getText());
                 // C:\\Users\\djankooo\\Desktop\\test"
 
-                Object[] objects = App.this.listAllFiles(urlTextField.getText());
+                map.put(iterator[0], createCSVTable(objects, iterator[0], gridPane, primaryStage));
 
                 if (objects.length > 1) {
 
-                    Pane dTablePane = App.this.createCSVTable(objects, iterator[0], gridPane, primaryStage);
-                    System.out.println("Iterator = " + iterator[0]);
-
-                    dTablePane.prefWidthProperty().bind(primaryStage.widthProperty().multiply(1.0D));
-                    gridPane.add(dTablePane, 0, 1);
+                    map.get(iterator[0]).prefWidthProperty().bind(primaryStage.widthProperty().multiply(1.0D));
+                    gridPane.add(map.get(iterator[0]), 0, 1);
                     urlTextField.prefWidthProperty().bind(primaryStage.widthProperty().multiply(0.6D));
 
                     header.getChildren().remove(urlTextField);
@@ -87,16 +91,28 @@ public class App extends Application {
 
         next.setOnAction(event -> {
 
-            Object[] objects = App.this.listAllFiles(urlTextField.getText());
+            Object[] objects = listAllFiles(urlTextField.getText());
 
             if(iterator[0]<(objects.length)-1) {
 
-                Pane dTablePane = null;
+                iterator[0]++;
+                System.out.println("Next iterator : " + iterator[0]);
+                System.out.println("(objects.length) : " + (objects.length));
 
-                try {
-                    dTablePane = createCSVTable(objects, ++iterator[0], gridPane, primaryStage);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                Pane dTablePane = null;
+                System.out.println("map.containsKey(iterator[0]) : " + map.containsKey(iterator[0]));
+
+                if(map.containsKey(iterator[0])) {
+                    dTablePane = map.get(iterator[0]);
+                    System.out.println("map.containsKey(iterator[0]) : " + map.get(iterator[0]));
+                }else{
+                    try {
+                        map.put(iterator[0], createCSVTable(objects, iterator[0], gridPane, primaryStage));
+                        dTablePane = map.get(iterator[0]);
+                        System.out.println("map.containsKey(iterator[0]) : " + map.get(iterator[0]));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 gridPane.getChildren().remove(dTablePane);
                 dTablePane.prefWidthProperty().bind(primaryStage.widthProperty().multiply(1.0D));
@@ -106,16 +122,28 @@ public class App extends Application {
 
         previous.setOnAction(event -> {
 
-            Object[] objects = App.this.listAllFiles(urlTextField.getText());
+            Object[] objects = listAllFiles(urlTextField.getText());
 
             if(iterator[0]>=2) {
 
-                Pane dTablePane = null;
+                iterator[0]--;
+                System.out.println("Next iterator : " + iterator[0]);
+                System.out.println("(objects.length) : " + (objects.length));
 
-                try {
-                    dTablePane = createCSVTable(objects, --iterator[0], gridPane, primaryStage);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                Pane dTablePane = null;
+                System.out.println("map.containsKey(iterator[0]) : " + map.containsKey(iterator[0]));
+
+                if(map.containsKey(iterator[0])) {
+                    dTablePane = map.get(iterator[0]);
+                    System.out.println("map.containsKey(iterator[0]) : " + map.get(iterator[0]));
+                }else{
+                    try {
+                        map.put(iterator[0], createCSVTable(objects, iterator[0], gridPane, primaryStage));
+                        dTablePane = map.get(iterator[0]);
+                        System.out.println("map.containsKey(iterator[0]) : " + map.get(iterator[0]));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 gridPane.getChildren().remove(dTablePane);
                 dTablePane.prefWidthProperty().bind(primaryStage.widthProperty().multiply(1.0D));
