@@ -72,6 +72,8 @@ public class App extends Application {
                 Object[] objects = listAllFiles(urlTextField.getText());
                 // C:\\Users\\djankooo\\Desktop\\test"
 
+                System.out.println(System.getProperty("java.version"));
+
                 map.put(iterator[0], createCSVTable(objects, iterator[0], gridPane, primaryStage));
 
                 if (objects.length > 1) {
